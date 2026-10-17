@@ -9,10 +9,11 @@ import sys
 from pathlib import PurePath
 
 BLOCKED_COMMANDS = [
-    (r"\brm\s+-\w*r\w*\s+(/|~|\$HOME|\*|\.)(\s|$)", "recursive delete of /, ~, * or the current folder"),
-    (r"\bgit\s+push\b.*\s(--force\b|-f\b)", "force push"),
+    (r"\brm\s+(-[\w-]+\s+)*-\w*[rR]\w*(\s+-[\w-]+)*\s+(/|~|\$HOME|\*|\.)/?(?=\s|$|[\"';&|)])", "recursive delete of /, ~, * or the current folder"),
+    (r"\bgit\s+push\b.*\s(--force(?![\w-])|-f\b)", "force push"),
     (r"\bgit\s+reset\s+--hard\b", "git reset --hard (discards uncommitted work)"),
     (r"\b(curl|wget)\b[^|]*\|\s*(sudo\s+)?(ba|z)?sh\b", "piping a download straight into a shell"),
+    (r"\bgit\s+(commit|push|merge)\b.*\s--no-verify\b|\bgit\s+commit\s+(-\w+\s+)*-n\b", "skipping git hooks with --no-verify"),
     (r"\.env\b(?!\.(example|sample|template)\b)", "touching a .env secrets file"),
 ]
 SAFE_ENV_NAMES = {".env.example", ".env.sample", ".env.template"}
@@ -28,7 +29,10 @@ def check(payload):
             if re.search(pattern, command):
                 return reason
     else:
-        name = PurePath(args.get("file_path", "")).name
+        path = PurePath(args.get("file_path", ""))
+        if tool != "Read" and ".claude" in path.parts and (path.name.startswith("settings") or "hooks" in path.parts):
+            return "editing Claude Code's own hook or settings files"
+        name = path.name
         if name == ".env" or (name.startswith(".env.") and name not in SAFE_ENV_NAMES):
             return "reading or editing a .env secrets file"
     return None

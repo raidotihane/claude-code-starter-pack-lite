@@ -4,7 +4,8 @@ Hooks are commands Claude Code runs automatically before or after it uses a tool
 
 | Hook | When | What it does |
 |---|---|---|
-| **Dangerous-command guard** | Before every shell command | Blocks `rm -rf /`, `rm -rf ~`, `rm -rf *`, force pushes, `git reset --hard`, and `curl ... \| sh` |
+| **Dangerous-command guard** | Before every shell command | Blocks `rm -rf /`, `rm -rf ~`, `rm -rf *`, `rm -rf ./`, force pushes (`--force-with-lease` is allowed), `git reset --hard`, skipping git hooks with `--no-verify`, and `curl ... \| sh` |
+| **Self-protection** (part of the guard) | Before Claude edits a file | Stops Claude from editing `.claude/settings*` or anything in `.claude/hooks/`, so it can't switch the guard off. Reading them is fine |
 | **Secrets guard** | Before reading, editing or running anything that touches `.env` | Keeps API keys in `.env` / `.env.local` / `.env.production` out of Claude's context. `.env.example` is allowed |
 | **Python auto-format** | After Claude edits a `.py` file | Runs `ruff format` on that file (skipped if ruff isn't installed) |
 

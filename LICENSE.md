@@ -1,6 +1,6 @@
 # License
 
-Copyright © 2026 [Your name / brand]. All rights reserved except as granted below.
+Copyright © 2026 Raido Tihane (PrimedKit). All rights reserved except as granted below.
 
 ## Personal license (standard purchase)
 
